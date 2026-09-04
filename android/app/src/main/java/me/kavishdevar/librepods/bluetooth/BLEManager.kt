@@ -48,6 +48,8 @@ class BLEManager(private val context: Context) {
         val lastSeen: Long = System.currentTimeMillis(),
         val paired: Boolean = false,
         val model: String = "Unknown",
+        /** Raw proximity-pairing model id, e.g. 0x0A20 for the AirPods Max. */
+        val modelId: Int = 0,
         val leftBattery: Int? = null,
         val rightBattery: Int? = null,
         val caseBattery: Int? = null,
@@ -95,7 +97,8 @@ class BLEManager(private val context: Context) {
         0x1920 to "AirPods 4",
         0x1B20 to "AirPods 4 (ANC)",
         0x0A20 to "AirPods Max",
-        0x1F20 to "AirPods Max (USB-C)"
+        0x1F20 to "AirPods Max (USB-C)",
+        0x2D20 to "AirPods Max 2"
     )
 
     val colorNames = mapOf(
@@ -259,7 +262,10 @@ class BLEManager(private val context: Context) {
             }
 
             val manufacturerData = scanRecord.getManufacturerSpecificData(76) ?: return
-            if (manufacturerData.size <= 20) return
+            // A proximity-pairing message is 27 bytes (type, length, 25 bytes of payload). While
+            // disconnected, the AirPods Max also send a short, fully encrypted variant that would be
+            // misparsed into a bogus model and random battery levels.
+            if (manufacturerData.size < 27 || manufacturerData[0] != 0x07.toByte()) return
 
             if (!verifiedAddresses.contains(address)) {
                 val irk = getIrkFromPreferences()
@@ -375,6 +381,7 @@ class BLEManager(private val context: Context) {
             lastSeen = System.currentTimeMillis(),
             paired = paired,
             model = model,
+            modelId = modelId,
             leftBattery = leftBattery,
             rightBattery = rightBattery,
             caseBattery = caseBattery,
@@ -475,6 +482,7 @@ class BLEManager(private val context: Context) {
             lastSeen = System.currentTimeMillis(),
             paired = paired,
             model = model,
+            modelId = modelId,
             leftBattery = decodeBattery(leftBatteryNibble),
             rightBattery = decodeBattery(rightBatteryNibble),
             caseBattery = decodeBattery(caseBattery),

@@ -56,7 +56,9 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 fun BatteryView(
     batteryList: List<Battery>,
     budsRes: Int,
-    caseRes: Int
+    caseRes: Int,
+    /** Over-ear models such as the AirPods Max have no case battery to show. */
+    hasCase: Boolean = true
 ) {
     val left = batteryList.find { it.component == BatteryComponent.LEFT }
     val right = batteryList.find { it.component == BatteryComponent.RIGHT }
@@ -80,8 +82,7 @@ fun BatteryView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
-                modifier = Modifier
-                    .weight(1f)
+                modifier = (if (hasCase) Modifier.weight(1f) else Modifier.fillMaxWidth(0.55f))
                     .fillMaxHeight(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -137,7 +138,7 @@ fun BatteryView(
                 }
             }
 
-            Column(
+            if (hasCase) Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
