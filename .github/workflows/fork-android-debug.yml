@@ -1,0 +1,30 @@
+# Fork only: builds a debug APK on GitHub's own runners (the upstream workflow
+# needs Blacksmith runners and the release signing secrets).
+name: Android debug APK (fork)
+
+on:
+  push:
+    branches: [airpods-max-2]
+    paths: [android/**, .github/workflows/fork-android-debug.yml]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build debug APK
+        run: ./gradlew assembleFossDebug
+        working-directory: android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: librepods-airpods-max-2-debug
+          path: android/app/build/outputs/apk/foss/debug/*.apk
