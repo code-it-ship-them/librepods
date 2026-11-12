@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
         with:
@@ -26,6 +27,12 @@ jobs:
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses > /dev/null || true
           "$SDKMANAGER" "ndk;30.0.14904198" > /dev/null
+      - name: Give Gradle and Kotlin enough memory
+        # gradle.properties sets no heap size; the default stalls the Kotlin compile.
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx4g -XX:+UseParallelGC" >> ~/.gradle/gradle.properties
+          echo "kotlin.daemon.jvmargs=-Xmx4g" >> ~/.gradle/gradle.properties
       - name: Build debug APK
         run: ./gradlew assembleFossDebug
         working-directory: android
