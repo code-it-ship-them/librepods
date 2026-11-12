@@ -23,8 +23,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Accept Android SDK licences and install the NDK
         run: |
-          yes | sdkmanager --licenses > /dev/null
-          sdkmanager "ndk;30.0.14904198"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" "ndk;30.0.14904198" > /dev/null
       - name: Build debug APK
         run: ./gradlew assembleFossDebug
         working-directory: android
