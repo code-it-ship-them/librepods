@@ -50,6 +50,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -63,6 +64,7 @@ import me.kavishdevar.librepods.data.AirPodsNotifications
 import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
+import me.kavishdevar.librepods.data.FormFactor
 import me.kavishdevar.librepods.services.ServiceManager
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.abs
@@ -374,12 +376,23 @@ class IslandWindow(private val context: Context) {
         }
 
         val videoView = islandView.findViewById<VideoView>(R.id.island_video_view)
-        val videoUri = "android.resource://me.kavishdevar.librepods/${R.raw.island}".toUri()
-        videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
-        videoView.setVideoURI(videoUri)
-        videoView.setOnPreparedListener { mediaPlayer ->
-            mediaPlayer.isLooping = true
-            videoView.start()
+        val deviceImage = islandView.findViewById<ImageView>(R.id.island_device_image)
+        val model = ServiceManager.getService()?.currentModel
+        // The bundled animation is of AirPods Pro, so show a still of the real model instead.
+        if (model != null && model.formFactor != FormFactor.IN_EAR) {
+            videoView.visibility = View.GONE
+            deviceImage.setImageResource(model.budsRes)
+            deviceImage.visibility = View.VISIBLE
+        } else {
+            deviceImage.visibility = View.GONE
+            videoView.visibility = View.VISIBLE
+            val videoUri = "android.resource://me.kavishdevar.librepods/${R.raw.island}".toUri()
+            videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
+            videoView.setVideoURI(videoUri)
+            videoView.setOnPreparedListener { mediaPlayer ->
+                mediaPlayer.isLooping = true
+                videoView.start()
+            }
         }
 
         try {
@@ -605,6 +618,7 @@ class IslandWindow(private val context: Context) {
 
             if (progress < 0.7f) {
                 islandView.findViewById<VideoView>(R.id.island_video_view).visibility = View.GONE
+                islandView.findViewById<ImageView>(R.id.island_device_image).visibility = View.GONE
             }
         }
         normalizeAnimator.addListener(object : AnimatorListenerAdapter() {

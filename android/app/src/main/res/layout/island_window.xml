@@ -23,6 +23,16 @@
         android:layout_marginStart="8dp"
         android:importantForAccessibility="no" />
 
+    <!-- Shown instead of the AirPods Pro animation for models it does not depict (AirPods Max). -->
+    <ImageView
+        android:id="@+id/island_device_image"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:importantForAccessibility="no" />
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"

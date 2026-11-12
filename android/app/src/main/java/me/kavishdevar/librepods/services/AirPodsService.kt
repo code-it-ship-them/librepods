@@ -2353,6 +2353,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         get() = (airpodsInstance?.model ?: resolveModel())
             ?.capabilities?.contains(Capability.ADAPTIVE_AUDIO) ?: true
 
+    /** The connected model, or our best guess while the AACP model number has not arrived. */
+    val currentModel: AirPodsBase?
+        get() = airpodsInstance?.model ?: resolveModel()
+
     /** Icon for the connected model, so the AirPods Max show headphones rather than earbuds. */
     val currentIconRes: Int
         get() = (airpodsInstance?.model ?: resolveModel())?.iconRes ?: R.drawable.airpods
